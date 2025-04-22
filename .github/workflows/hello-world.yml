@@ -1,24 +1,25 @@
-name: Node.js CI Build
+name: Build and Test
 
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
+      - uses: actions/checkout@v3
+      - run: mkdir dist && echo "hello world" > dist/output.txt
+      - uses: actions/upload-artifact@v4
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          name: build-artifact
+          path: dist/
 
-      - uses: actions/setup-node@v4
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v4
         with:
-          node-version: 18
-
-      - run: npm install
+          name: build-artifact
+          path: ./build
+      - run: cat ./build/output.txt
