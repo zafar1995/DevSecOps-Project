@@ -1,21 +1,24 @@
 name: Node.js CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
-  test:
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        node-version: [14, 16, 18]
+  build:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Cache node_modules
+        uses: actions/cache@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
       - run: npm install
-
